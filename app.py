@@ -3,7 +3,7 @@ import tempfile
 from datetime import date
 import streamlit as st
 from dotenv import load_dotenv
-from langchain_core.messages import AIMessage, ToolMessage
+from langchain_core.messages import AIMessage
 from transcribe import transcribe_audio
 from agent import build_agent
 from config import MAX_ITERATIONS
@@ -77,38 +77,41 @@ if process:
 
         # Run the agent
         st.divider()
-        with st.spinner("Agent is processing..."):
-            graph, initial_messages = build_agent(transcript, str(meeting_date))
-            result = graph.invoke(
-                {"messages": initial_messages},
-                config={
-                    "metadata": {"meeting_date": str(meeting_date)},
-                    "recursion_limit": MAX_ITERATIONS,
-                },
-            )
-
-        # Show agent steps
-        tool_calls_made = []
-        final_answer = ""
-
-        for msg in result["messages"]:
-            if isinstance(msg, AIMessage):
-                if msg.tool_calls:
-                    for tc in msg.tool_calls:
-                        tool_calls_made.append(tc)
-                elif msg.content:
-                    final_answer = msg.content
-
-        with st.expander(f"Agent made {len(tool_calls_made)} tool calls"):
-            for i, tc in enumerate(tool_calls_made, 1):
-                args_preview = ", ".join(
-                    f"{k}={str(v)[:50]}" for k, v in tc["args"].items()
+        try:
+            with st.spinner("Agent is processing..."):
+                graph, initial_messages = build_agent(transcript, str(meeting_date))
+                result = graph.invoke(
+                    {"messages": initial_messages},
+                    config={
+                        "metadata": {"meeting_date": str(meeting_date)},
+                        "recursion_limit": MAX_ITERATIONS,
+                    },
                 )
-                st.markdown(f"**Step {i}:** `{tc['name']}({args_preview})`")
 
-        # Show the structured notes
-        st.subheader("Meeting Notes")
-        if final_answer:
-            st.markdown(final_answer)
-        else:
-            st.warning("Agent did not produce meeting notes.")
+            # Show agent steps
+            tool_calls_made = []
+            final_answer = ""
+
+            for msg in result["messages"]:
+                if isinstance(msg, AIMessage):
+                    if msg.tool_calls:
+                        for tc in msg.tool_calls:
+                            tool_calls_made.append(tc)
+                    elif msg.content:
+                        final_answer = msg.content
+
+            with st.expander(f"Agent made {len(tool_calls_made)} tool calls"):
+                for i, tc in enumerate(tool_calls_made, 1):
+                    args_preview = ", ".join(
+                        f"{k}={str(v)[:50]}" for k, v in tc["args"].items()
+                    )
+                    st.markdown(f"**Step {i}:** `{tc['name']}({args_preview})`")
+
+            # Show the structured notes
+            st.subheader("Meeting Notes")
+            if final_answer:
+                st.markdown(final_answer)
+            else:
+                st.warning("Agent did not produce meeting notes.")
+        except Exception as e:
+            st.error(f"Agent failed: {e}. Please try again.")

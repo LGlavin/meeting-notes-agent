@@ -27,16 +27,19 @@ def save_meeting_notes(
         decisions: Key decisions made, one per line
         follow_ups: Items to follow up on in the next meeting
     """
-    table = _get_table()
-    record = table.create({
-        "Date": str(date),
-        "Attendees": str(attendees),
-        "Summary": str(summary),
-        "Action Items": str(action_items),
-        "Decisions": str(decisions),
-        "Follow Ups": str(follow_ups),
-    })
-    return f"Meeting notes saved to Airtable (Record ID: {record['id']})"
+    try:
+        table = _get_table()
+        record = table.create({
+            "Date": str(date),
+            "Attendees": str(attendees),
+            "Summary": str(summary),
+            "Action Items": str(action_items),
+            "Decisions": str(decisions),
+            "Follow Ups": str(follow_ups),
+        })
+        return f"Meeting notes saved to Airtable (Record ID: {record['id']})"
+    except Exception as e:
+        return f"Error saving to Airtable: {e}"
 
 
 @tool
@@ -46,22 +49,25 @@ def get_past_meeting_notes(attendee: str) -> str:
     Args:
         attendee: Name of the person to look up past meetings for
     """
-    table = _get_table()
-    records = table.all(formula=f"FIND('{attendee}', {{Attendees}})")
+    try:
+        table = _get_table()
+        records = table.all(formula=f"FIND('{attendee}', {{Attendees}})")
 
-    if not records:
-        return f"No past meetings found with {attendee}."
+        if not records:
+            return f"No past meetings found with {attendee}."
 
-    results = []
-    for record in records[-3:]:  # Last 3 meetings
-        fields = record["fields"]
-        results.append(
-            f"Date: {fields.get('Date', 'N/A')}\n"
-            f"Summary: {fields.get('Summary', 'N/A')}\n"
-            f"Follow Ups: {fields.get('Follow Ups', 'N/A')}\n"
-            f"Action Items: {fields.get('Action Items', 'N/A')}"
-        )
-    return "\n\n---\n\n".join(results)
+        results = []
+        for record in records[-3:]:  # Last 3 meetings
+            fields = record["fields"]
+            results.append(
+                f"Date: {fields.get('Date', 'N/A')}\n"
+                f"Summary: {fields.get('Summary', 'N/A')}\n"
+                f"Follow Ups: {fields.get('Follow Ups', 'N/A')}\n"
+                f"Action Items: {fields.get('Action Items', 'N/A')}"
+            )
+        return "\n\n---\n\n".join(results)
+    except Exception as e:
+        return f"Error looking up past meetings: {e}"
 
 
 all_tools = [save_meeting_notes, get_past_meeting_notes]

@@ -6,7 +6,7 @@ from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 from typing_extensions import TypedDict
 from tools import all_tools
-from config import LLM_MODEL, MAX_ITERATIONS
+from config import LLM_MODEL
 
 SYSTEM_PROMPT = """You are a meeting notes agent that processes meeting transcripts.
 
