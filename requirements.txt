@@ -1,0 +1,8 @@
+langchain>=0.3
+langchain-openai>=0.3
+langgraph>=0.4
+langsmith>=0.3
+streamlit>=1.40
+openai>=1.0
+pyairtable>=2.0
+python-dotenv>=1.0
