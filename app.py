@@ -1,4 +1,6 @@
 import os
+os.environ.setdefault("LANGCHAIN_TRACING_V2", os.getenv("LANGCHAIN_TRACING_V2", "true"))
+os.environ.setdefault("LANGCHAIN_API_KEY", os.getenv("LANGCHAIN_API_KEY", ""))
 import tempfile
 from datetime import date
 import streamlit as st
