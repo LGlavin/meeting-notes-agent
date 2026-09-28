@@ -5,8 +5,8 @@ import streamlit as st
 from dotenv import load_dotenv
 
 # Load secrets into env vars for Streamlit Cloud
-for key in ["OPENAI_API_KEY", "LANGCHAIN_API_KEY", "LANGCHAIN_TRACING_V2",
-            "LANGCHAIN_PROJECT", "AIRTABLE_API_KEY", "AIRTABLE_BASE_ID", "AIRTABLE_TABLE_NAME"]:
+for key in ["OPENAI_API_KEY", "AIRTABLE_API_KEY", "AIRTABLE_BASE_ID", "AIRTABLE_TABLE_NAME",
+            "LANGSMITH_TRACING", "LANGSMITH_API_KEY", "LANGSMITH_PROJECT", "LANGSMITH_ENDPOINT"]:
     if key in st.secrets:
         os.environ[key] = st.secrets[key]
 from langchain_core.messages import AIMessage
