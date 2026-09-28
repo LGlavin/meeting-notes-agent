@@ -10,8 +10,6 @@ for key in ["OPENAI_API_KEY", "LANGCHAIN_API_KEY", "LANGCHAIN_TRACING_V2",
     if key in st.secrets:
         os.environ[key] = st.secrets[key]
 from langchain_core.messages import AIMessage
-from langsmith import Client
-from langsmith.run_helpers import get_langsmith_tracer
 from transcribe import transcribe_audio
 from agent import build_agent
 from config import MAX_ITERATIONS
@@ -88,13 +86,11 @@ if process:
         try:
             with st.spinner("Agent is processing..."):
                 graph, initial_messages = build_agent(transcript, str(meeting_date))
-                tracer = get_langsmith_tracer()
                 result = graph.invoke(
                     {"messages": initial_messages},
                     config={
                         "metadata": {"meeting_date": str(meeting_date)},
                         "recursion_limit": MAX_ITERATIONS,
-                        "callbacks": [tracer],
                     },
                 )
 
