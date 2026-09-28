@@ -1,11 +1,14 @@
 import os
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY", "")
-os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT", "meeting-notes-agent")
 import tempfile
 from datetime import date
 import streamlit as st
 from dotenv import load_dotenv
+
+# Load secrets into env vars for Streamlit Cloud
+for key in ["OPENAI_API_KEY", "LANGCHAIN_API_KEY", "LANGCHAIN_TRACING_V2",
+            "LANGCHAIN_PROJECT", "AIRTABLE_API_KEY", "AIRTABLE_BASE_ID", "AIRTABLE_TABLE_NAME"]:
+    if key in st.secrets:
+        os.environ[key] = st.secrets[key]
 from langchain_core.messages import AIMessage
 from transcribe import transcribe_audio
 from agent import build_agent
