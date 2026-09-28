@@ -10,6 +10,7 @@ for key in ["OPENAI_API_KEY", "AIRTABLE_API_KEY", "AIRTABLE_BASE_ID", "AIRTABLE_
     if key in st.secrets:
         os.environ[key] = st.secrets[key]
 from langchain_core.messages import AIMessage
+from langchain_core.tracers import LangChainTracer
 from transcribe import transcribe_audio
 from agent import build_agent
 from config import MAX_ITERATIONS
@@ -86,11 +87,13 @@ if process:
         try:
             with st.spinner("Agent is processing..."):
                 graph, initial_messages = build_agent(transcript, str(meeting_date))
+                tracer = LangChainTracer(project_name=os.getenv("LANGSMITH_PROJECT", "meeting-notes-project-2"))
                 result = graph.invoke(
                     {"messages": initial_messages},
                     config={
                         "metadata": {"meeting_date": str(meeting_date)},
                         "recursion_limit": MAX_ITERATIONS,
+                        "callbacks": [tracer],
                     },
                 )
 
